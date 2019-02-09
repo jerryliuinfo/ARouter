@@ -76,6 +76,8 @@ public class LogisticsCenter {
      * @param className class name
      */
     private static void register(String className) {
+        logger.info(TAG,"register className:" + className);
+
         if (!TextUtils.isEmpty(className)) {
             try {
                 Class<?> clazz = Class.forName(className);
@@ -182,13 +184,18 @@ public class LogisticsCenter {
                 startInit = System.currentTimeMillis();
 
                 for (String className : routerMap) {
+                    //"com.alibaba.android.arouter.routes.f $$Root"
                     if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
                         // This one of root elements, load root.
                         ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
-                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
+                    }
+                    //"com.alibaba.android.arouter.routes.f $$Interceptors"
+                    else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
                         // Load interceptorMeta
                         ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
-                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
+                    }
+                    //"com.alibaba.android.arouter.routes.f $$Providers"
+                    else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
                         // Load providerIndex
                         ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
                     }
@@ -234,9 +241,10 @@ public class LogisticsCenter {
         if (null == postcard) {
             throw new NoRouteFoundException(TAG + "No postcard!");
         }
-
+        // 查找Warehouse仓库的路由节点缓存，看是否已在缓存中
         RouteMeta routeMeta = Warehouse.routes.get(postcard.getPath());
         if (null == routeMeta) {    // Maybe its does't exist, or didn't load.
+            // 如果没有，查找仓库的组别清单中是否存在该组别，组别清单已经在初始化的时候加载到仓库中去了
             Class<? extends IRouteGroup> groupMeta = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
             if (null == groupMeta) {
                 throw new NoRouteFoundException(TAG + "There is no route match the path [" + postcard.getPath() + "], in group [" + postcard.getGroup() + "]");
@@ -246,9 +254,11 @@ public class LogisticsCenter {
                     if (ARouter.debuggable()) {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
                     }
-
+                    // 实例化个组别的类，调用loadInto()，将组别中所有的路由节点加载进仓库Warehouse.routes，缓存
                     IRouteGroup iGroupInstance = groupMeta.getConstructor().newInstance();
+                    //加载某个group底下的所有routes
                     iGroupInstance.loadInto(Warehouse.routes);
+                    // 从组别清单中删除已加载的组别，防止重复加载
                     Warehouse.groupsIndex.remove(postcard.getGroup());
 
                     if (ARouter.debuggable()) {
@@ -257,10 +267,12 @@ public class LogisticsCenter {
                 } catch (Exception e) {
                     throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
                 }
-
+                //重新执行completion方法，获取到的routeMeta就不可能为空了
                 completion(postcard);   // Reload
             }
         } else {
+            //给postcard设置destination,type,priority等值，供上面讲解到的_navigation()进行使用
+            // 其中routeMeta是在ARouter$$Group$$xxx的loadInto中创建的
             postcard.setDestination(routeMeta.getDestination());
             postcard.setType(routeMeta.getType());
             postcard.setPriority(routeMeta.getPriority());

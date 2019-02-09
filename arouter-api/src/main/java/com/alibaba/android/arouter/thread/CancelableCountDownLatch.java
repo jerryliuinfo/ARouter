@@ -21,6 +21,9 @@ public class CancelableCountDownLatch extends CountDownLatch {
         super(count);
     }
 
+    /**
+     * 将CountDownLatch计数清0
+     */
     public void cancel() {
         while (getCount() > 0) {
             countDown();

@@ -51,6 +51,7 @@ android {
 
 dependencies {
     annotationProcessor project(':arouter-compiler')
+
     implementation project(':arouter-api')
     implementation project(':module-java')
     implementation project(':module-kotlin')

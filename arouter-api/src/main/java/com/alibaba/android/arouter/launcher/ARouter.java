@@ -140,6 +140,14 @@ public final class ARouter {
     public Postcard build(String path) {
         return _ARouter.getInstance().build(path);
     }
+    /**
+     * Build the roadmap, draw a postcard.
+     *
+     * @param url the path
+     */
+    public Postcard build(Uri url) {
+        return _ARouter.getInstance().build(url);
+    }
 
     /**
      * Build the roadmap, draw a postcard.
@@ -152,14 +160,7 @@ public final class ARouter {
         return _ARouter.getInstance().build(path, group);
     }
 
-    /**
-     * Build the roadmap, draw a postcard.
-     *
-     * @param url the path
-     */
-    public Postcard build(Uri url) {
-        return _ARouter.getInstance().build(url);
-    }
+
 
     /**
      * Launch the navigation by type

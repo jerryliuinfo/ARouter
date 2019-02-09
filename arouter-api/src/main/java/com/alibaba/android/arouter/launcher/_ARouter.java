@@ -277,6 +277,7 @@ final class _ARouter {
      */
     protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         try {
+            //首先对postcard进行一些处理，设置postcard的destination，type，priority 等一些属性值，completion()后面会有分析
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
             logger.warning(Consts.TAG, ex.getMessage());
@@ -292,7 +293,9 @@ final class _ARouter {
                     }
                 });
             }
-
+            // 如果处理postcard失败，通过 callback 回调失败结果
+            // callback为空的情况下，如果有定义全局的降级处理（DegradeService），则使用全局处理
+            //降级处理也需要我们自己实现DegradeService接口
             if (null != callback) {
                 callback.onLost(postcard);
             } else {    // No callback for this invoke, then we use the global degrade service.
@@ -304,11 +307,12 @@ final class _ARouter {
 
             return null;
         }
-
+        //回调onFound
         if (null != callback) {
             callback.onFound(postcard);
         }
 
+        //目前来说，PROVIDER服务类型，以及FRAGMENT类型不需要通过拦截器外，其他类型均需要通过拦截器
         if (!postcard.isGreenChannel()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
             interceptorService.doInterceptions(postcard, new InterceptorCallback() {
                 /**
@@ -349,6 +353,7 @@ final class _ARouter {
             case ACTIVITY:
                 // Build intent
                 final Intent intent = new Intent(currentContext, postcard.getDestination());
+                //设置参数
                 intent.putExtras(postcard.getExtras());
 
                 // Set flags.
