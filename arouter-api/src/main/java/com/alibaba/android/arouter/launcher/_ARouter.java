@@ -244,6 +244,12 @@ final class _ARouter {
         interceptorService = (InterceptorService) ARouter.getInstance().build("/arouter/service/interceptor").navigation();
     }
 
+    /**
+     * Provider类型的走这里，没有拦截器等逻辑
+     * @param service
+     * @param <T>
+     * @return
+     */
     protected <T> T navigation(Class<? extends T> service) {
         try {
             Postcard postcard = LogisticsCenter.buildProvider(service.getName());
@@ -314,6 +320,7 @@ final class _ARouter {
 
         //目前来说，PROVIDER服务类型，以及FRAGMENT类型不需要通过拦截器外，其他类型均需要通过拦截器
         if (!postcard.isGreenChannel()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
+            //如果需要拦截就执行onInterrupt(),否则执行onContinue,在onContinue中执行_navigation
             interceptorService.doInterceptions(postcard, new InterceptorCallback() {
                 /**
                  * Continue process

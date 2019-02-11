@@ -47,6 +47,10 @@ public class InterceptorServiceImpl implements InterceptorService {
                     try {
                         _excute(0, interceptorCounter, postcard);
                         interceptorCounter.await(postcard.getTimeout(), TimeUnit.SECONDS);
+
+                        //。出现这种情况的原因是在某个拦截器的process()方法中，既没调用callback的onContinue()也没调用onInterrupt()
+                        // 方法，导致没有调用同步工具的countDown()方法，以至于_excute()执行完毕，然后执行interceptorCounter.await(postcard
+                        // .getTimeout(), TimeUnit.SECONDS)后，同步工具的计数值未减为0。
                         if (interceptorCounter.getCount() > 0) {    // Cancel the navigation this time, if it hasn't return anythings.
                             callback.onInterrupt(new HandlerException("The interceptor processing timed out."));
                         } else if (null != postcard.getTag()) {    // Maybe some exception in the tag.

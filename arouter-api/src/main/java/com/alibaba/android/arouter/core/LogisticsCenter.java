@@ -182,19 +182,20 @@ public class LogisticsCenter {
 
                 logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
                 startInit = System.currentTimeMillis();
-
+                //其实这个方法的主要功能就是得到com.alibaba.android.arouter.routes包中所有的文件，然后Group 、Interceptor 、Provider
+                //三种清单加载到 Warehouse 内存仓库中
                 for (String className : routerMap) {
-                    //"com.alibaba.android.arouter.routes.f $$Root"
+                    //"com.alibaba.android.arouter.routes.ARouter$$Root"
                     if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
                         // This one of root elements, load root.
                         ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
                     }
-                    //"com.alibaba.android.arouter.routes.f $$Interceptors"
+                    //"com.alibaba.android.arouter.routes.ARouter$$Interceptors"
                     else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
                         // Load interceptorMeta
                         ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
                     }
-                    //"com.alibaba.android.arouter.routes.f $$Providers"
+                    //"com.alibaba.android.arouter.routes.ARouter$$Providers"
                     else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
                         // Load providerIndex
                         ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);

@@ -49,11 +49,17 @@ public class Consts {
     private static final String SERVICE_PACKAGE = ".service";
     public static final String IPROVIDER = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IProvider";
     public static final String IPROVIDER_GROUP = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IProviderGroup";
+    //"com.alibaba.android.arouter.facade.template.IInterceptor"
     public static final String IINTERCEPTOR = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IInterceptor";
+    //"com.alibaba.android.arouter.facade.template.IInterceptorGroup"
     public static final String IINTERCEPTOR_GROUP = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IInterceptorGroup";
+    //"com.alibaba.android.arouter.facade.template.IRouteRoot"
     public static final String ITROUTE_ROOT = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IRouteRoot";
+    //"com.alibaba.android.arouter.facade.template.IRouteGroup"
     public static final String IROUTE_GROUP = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IRouteGroup";
+    //"com.alibaba.android.arouter.facade.template.ISyringe"
     public static final String ISYRINGE = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".ISyringe";
+    //"com.alibaba.android.arouter.facade.template.SerializationService"
     public static final String JSON_SERVICE = FACADE_PACKAGE + SERVICE_PACKAGE + ".SerializationService";
 
     // Log

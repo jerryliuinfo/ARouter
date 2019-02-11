@@ -60,6 +60,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes(ANNOTATION_TYPE_INTECEPTOR)
 public class InterceptorProcessor extends AbstractProcessor {
+    //TreeMap：键、值都不能为null
     private Map<Integer, Element> interceptors = new TreeMap<>();
     private Filer mFiler;       // File util, write class file into disk.
     private Logger logger;
@@ -100,6 +101,7 @@ public class InterceptorProcessor extends AbstractProcessor {
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
         }
 
+        //com.alibaba.android.arouter.facade.template.IInterceptor
         iInterceptor = elementUtil.getTypeElement(Consts.IINTERCEPTOR).asType();
 
         logger.info(">>> InterceptorProcessor init. <<<");
@@ -137,10 +139,13 @@ public class InterceptorProcessor extends AbstractProcessor {
 
             // Verify and cache, sort incidentally.
             for (Element element : elements) {
+                //检查被@Interceptor注解的元素是否实现了IInterceptor接口
                 if (verify(element)) {  // Check the interceptor meta
                     logger.info("A interceptor verify over, its " + element.asType());
                     Interceptor interceptor = element.getAnnotation(Interceptor.class);
-
+                    //interceptors是一个TreeMap<Integer, Element>集合，按照拦截器的优先级值作为key值进行保存拦截器元素
+                    //通过优先级的值获取拦截器元素，如果已经存在同优先级的拦截器则抛出异常
+                    //这个地方也解释了为什么拦截器的优先级的值不能一样
                     Element lastInterceptor = interceptors.get(interceptor.priority());
                     if (null != lastInterceptor) { // Added, throw exceptions
                         throw new IllegalArgumentException(
@@ -162,9 +167,9 @@ public class InterceptorProcessor extends AbstractProcessor {
             TypeElement type_ITollgateGroup = elementUtil.getTypeElement(IINTERCEPTOR_GROUP);
 
             /**
-             *  Build input type, format as :
+             *  创建参数类型
              *
-             *  ```Map<Integer, Class<? extends ITollgate>>```
+             *  创建ARouter$$Interceptors$$xxx类中方法参数Map<Integer, Class<? extends IInterceptor>>类型的名称
              */
             ParameterizedTypeName inputMapTypeOfTollgate = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
@@ -175,16 +180,16 @@ public class InterceptorProcessor extends AbstractProcessor {
                     )
             );
 
-            // Build input param name.
+            // 创建输入的参数Map<Integer, Class<? extends IInterceptor>>名， interceptors
             ParameterSpec tollgateParamSpec = ParameterSpec.builder(inputMapTypeOfTollgate, "interceptors").build();
 
-            // Build method : 'loadInto'
+            // 创建ARouter$$Interceptors$$xxx类的loadInto方法
             MethodSpec.Builder loadIntoMethodOfTollgateBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
                     .addAnnotation(Override.class)
                     .addModifiers(PUBLIC)
                     .addParameter(tollgateParamSpec);
 
-            // Generate
+            // 遍历保存的拦截器的集合，添加方法体
             if (null != interceptors && interceptors.size() > 0) {
                 // Build method body
                 for (Map.Entry<Integer, Element> entry : interceptors.entrySet()) {
@@ -192,7 +197,7 @@ public class InterceptorProcessor extends AbstractProcessor {
                 }
             }
 
-            // Write to disk(Write file even interceptors is empty.)
+            //生成java文件ARouter$$Interceptors$$xxx，xxx为moduleName
             JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                     TypeSpec.classBuilder(NAME_OF_INTERCEPTOR + SEPARATOR + moduleName)
                             .addModifiers(PUBLIC)

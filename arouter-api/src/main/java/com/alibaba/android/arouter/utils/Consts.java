@@ -8,7 +8,7 @@ package com.alibaba.android.arouter.utils;
  * @since 16/8/23 9:38
  */
 public final class Consts {
-    public static final String SDK_NAME = "f ";
+    public static final String SDK_NAME = "ARouter";
     public static final String TAG = SDK_NAME + "::";
     public static final String SEPARATOR = "$$";
     public static final String SUFFIX_ROOT = "Root";
